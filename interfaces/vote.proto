@@ -1,0 +1,56 @@
+package proto;
+
+
+service raft {
+  rpc AppendEntries(AppendEntriesRequest) returns(AppendEntriesResponse) {}
+
+  rpc Vote(VoteRequest) returns(VoteResponse) {}
+  
+  rpc Hello(Empty) returns(HelloResponse) {}
+};
+
+message Empty{}
+
+enum LogAction {
+  NOP = 0;
+  SET = 1;
+  INC = 2;
+  DEC = 3;
+  DEL = 4;
+};
+
+message LogEntry {
+  required LogAction Action = 1;
+  optional int32 Value = 2;
+};
+
+
+message AppendEntriesRequest {
+  required uint64 Term = 1;
+  required uint32 LeaderId = 2;
+  required uint64 PrevLogIndex = 3;
+  required uint64 PrevLogTerm = 4;
+  repeated LogEntry Entries = 5;
+  required uint64 LeaderCommit = 6;
+};
+
+message AppendEntriesResponse {
+  required uint64 Term = 1;
+  required bool   IsSuccess = 2;
+};
+
+message VoteRequest { 
+  required uint64 Term = 1;
+  required uint64 CandidateId = 2;
+  required uint64 LastLogIndex = 3;
+  required uint64 LastLogTerm = 4;
+};
+
+message VoteResponse {
+   required uint64 Term = 1;
+   required bool   IsGranted = 2;
+};
+
+message HelloResponse {
+  required int32 MyId = 1 [default = -1];
+}
