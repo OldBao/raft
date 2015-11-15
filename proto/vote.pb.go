@@ -109,7 +109,7 @@ func (m *LogEntry) GetValue() int32 {
 
 type AppendEntriesRequest struct {
 	Term             *uint64     `protobuf:"varint,1,req,name=Term" json:"Term,omitempty"`
-	LeaderId         *uint32     `protobuf:"varint,2,req,name=LeaderId" json:"LeaderId,omitempty"`
+	LeaderId         *int32      `protobuf:"varint,2,req,name=LeaderId" json:"LeaderId,omitempty"`
 	PrevLogIndex     *uint64     `protobuf:"varint,3,req,name=PrevLogIndex" json:"PrevLogIndex,omitempty"`
 	PrevLogTerm      *uint64     `protobuf:"varint,4,req,name=PrevLogTerm" json:"PrevLogTerm,omitempty"`
 	Entries          []*LogEntry `protobuf:"bytes,5,rep,name=Entries" json:"Entries,omitempty"`
@@ -128,7 +128,7 @@ func (m *AppendEntriesRequest) GetTerm() uint64 {
 	return 0
 }
 
-func (m *AppendEntriesRequest) GetLeaderId() uint32 {
+func (m *AppendEntriesRequest) GetLeaderId() int32 {
 	if m != nil && m.LeaderId != nil {
 		return *m.LeaderId
 	}
@@ -189,7 +189,7 @@ func (m *AppendEntriesResponse) GetIsSuccess() bool {
 
 type VoteRequest struct {
 	Term             *uint64 `protobuf:"varint,1,req,name=Term" json:"Term,omitempty"`
-	CandidateId      *uint64 `protobuf:"varint,2,req,name=CandidateId" json:"CandidateId,omitempty"`
+	CandidateId      *int32  `protobuf:"varint,2,req,name=CandidateId" json:"CandidateId,omitempty"`
 	LastLogIndex     *uint64 `protobuf:"varint,3,req,name=LastLogIndex" json:"LastLogIndex,omitempty"`
 	LastLogTerm      *uint64 `protobuf:"varint,4,req,name=LastLogTerm" json:"LastLogTerm,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
@@ -206,7 +206,7 @@ func (m *VoteRequest) GetTerm() uint64 {
 	return 0
 }
 
-func (m *VoteRequest) GetCandidateId() uint64 {
+func (m *VoteRequest) GetCandidateId() int32 {
 	if m != nil && m.CandidateId != nil {
 		return *m.CandidateId
 	}
@@ -288,7 +288,7 @@ var _ grpc.ClientConn
 
 type RaftClient interface {
 	AppendEntries(ctx context.Context, in *AppendEntriesRequest, opts ...grpc.CallOption) (*AppendEntriesResponse, error)
-	Vote(ctx context.Context, in *VoteRequest, opts ...grpc.CallOption) (*VoteResponse, error)
+	RequestVote(ctx context.Context, in *VoteRequest, opts ...grpc.CallOption) (*VoteResponse, error)
 	Hello(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*HelloResponse, error)
 }
 
@@ -309,9 +309,9 @@ func (c *raftClient) AppendEntries(ctx context.Context, in *AppendEntriesRequest
 	return out, nil
 }
 
-func (c *raftClient) Vote(ctx context.Context, in *VoteRequest, opts ...grpc.CallOption) (*VoteResponse, error) {
+func (c *raftClient) RequestVote(ctx context.Context, in *VoteRequest, opts ...grpc.CallOption) (*VoteResponse, error) {
 	out := new(VoteResponse)
-	err := grpc.Invoke(ctx, "/proto.raft/Vote", in, out, c.cc, opts...)
+	err := grpc.Invoke(ctx, "/proto.raft/RequestVote", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -331,7 +331,7 @@ func (c *raftClient) Hello(ctx context.Context, in *Empty, opts ...grpc.CallOpti
 
 type RaftServer interface {
 	AppendEntries(context.Context, *AppendEntriesRequest) (*AppendEntriesResponse, error)
-	Vote(context.Context, *VoteRequest) (*VoteResponse, error)
+	RequestVote(context.Context, *VoteRequest) (*VoteResponse, error)
 	Hello(context.Context, *Empty) (*HelloResponse, error)
 }
 
@@ -351,12 +351,12 @@ func _Raft_AppendEntries_Handler(srv interface{}, ctx context.Context, dec func(
 	return out, nil
 }
 
-func _Raft_Vote_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error) (interface{}, error) {
+func _Raft_RequestVote_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error) (interface{}, error) {
 	in := new(VoteRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
-	out, err := srv.(RaftServer).Vote(ctx, in)
+	out, err := srv.(RaftServer).RequestVote(ctx, in)
 	if err != nil {
 		return nil, err
 	}
@@ -384,8 +384,8 @@ var _Raft_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Raft_AppendEntries_Handler,
 		},
 		{
-			MethodName: "Vote",
-			Handler:    _Raft_Vote_Handler,
+			MethodName: "RequestVote",
+			Handler:    _Raft_RequestVote_Handler,
 		},
 		{
 			MethodName: "Hello",

@@ -4,7 +4,7 @@ package proto;
 service raft {
   rpc AppendEntries(AppendEntriesRequest) returns(AppendEntriesResponse) {}
 
-  rpc Vote(VoteRequest) returns(VoteResponse) {}
+  rpc RequestVote(VoteRequest) returns(VoteResponse) {}
   
   rpc Hello(Empty) returns(HelloResponse) {}
 };
@@ -27,7 +27,7 @@ message LogEntry {
 
 message AppendEntriesRequest {
   required uint64 Term = 1;
-  required uint32 LeaderId = 2;
+  required int32 LeaderId = 2;
   required uint64 PrevLogIndex = 3;
   required uint64 PrevLogTerm = 4;
   repeated LogEntry Entries = 5;
@@ -41,7 +41,7 @@ message AppendEntriesResponse {
 
 message VoteRequest { 
   required uint64 Term = 1;
-  required uint64 CandidateId = 2;
+  required int32 CandidateId = 2;
   required uint64 LastLogIndex = 3;
   required uint64 LastLogTerm = 4;
 };
